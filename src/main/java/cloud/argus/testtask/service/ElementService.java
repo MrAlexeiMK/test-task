@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class CloudUserElementService {
+public class ElementService {
     private final CloudUserElementRepository cloudUserElementRepository;
 
-    public CloudUserElementService(final CloudUserElementRepository cloudUserElementRepository) {
+    public ElementService(final CloudUserElementRepository cloudUserElementRepository) {
         this.cloudUserElementRepository = cloudUserElementRepository;
     }
 

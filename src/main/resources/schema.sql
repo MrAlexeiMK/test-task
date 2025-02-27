@@ -1,8 +1,7 @@
 create table if not exists cloud_user (
     id integer generated always as identity primary key,
-    email text not null
+    email text not null unique
 );
-create unique index if not exists cloud_user_email_idx on cloud_user(lower(email));
 
 create table if not exists element (
     id integer generated always as identity primary key,

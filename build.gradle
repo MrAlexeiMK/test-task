@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.3'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.jooq.jooq-codegen-gradle' version '3.19.19'
 }
 
 group = 'cloud.argus'
@@ -17,15 +18,65 @@ repositories {
     mavenCentral()
 }
 
+def schemaDdl = file("src/main/resources/schema.sql")
+
+jooq {
+    configuration {
+        jdbc {
+            driver = "org.testcontainers.jdbc.ContainerDatabaseDriver"
+            url = "jdbc:tc:postgresql:17.0:///test-task?TC_INITSCRIPT=file:${schemaDdl.absolutePath}"
+        }
+        generator {
+            database {
+                name = "org.jooq.meta.postgres.PostgresDatabase"
+                inputSchema = "public"
+            }
+            generate {
+                implicitJoinPathsToMany = false
+                fluentSetters = true
+                javaTimeTypes = true
+                nullableAnnotation = true
+                pojos = true
+                pojosAsJavaRecordClasses = true
+                pojosEqualsAndHashCode = false
+                pojosToString = false
+                serializablePojos = false
+                nullableAnnotation = true
+                nullableAnnotationType = "jakarta.annotation.Nullable"
+                nonnullAnnotation = true
+                nonnullAnnotationType = "jakarta.annotation.Nonnull"
+            }
+            target {
+                packageName = "cloud.argus.jooq.generated"
+                locale = "ru"
+            }
+        }
+    }
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
-    implementation  'org.springframework.boot:spring-boot-starter-jooq'
-    runtimeOnly 'org.postgresql:postgresql'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-jooq'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.postgresql:postgresql'
+    implementation 'org.jooq:jooq'
+    compileOnly 'jakarta.xml.bind:jakarta.xml.bind-api'
     developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
+    jooqCodegen 'org.postgresql:postgresql'
+    jooqCodegen 'org.testcontainers:postgresql'
+}
+
+tasks.named('jooqCodegen') {
+    inputs.file(schemaDdl)
+}
+
+tasks.named('compileJava') {
+    inputs.files(tasks.named("jooqCodegen"))
 }
 
 tasks.named('test') {

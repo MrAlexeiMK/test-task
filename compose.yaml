@@ -1,14 +1,16 @@
 services:
   database:
-    image: 'postgres:17.0'
-    container_name: argus-cloud-database
+    image: 'postgres:17.2'
+    container_name: test-task-database
     mem_limit: 1g
     ports:
       - '15432:5432/tcp'
     environment:
-      - POSTGRES_DB=argus
+      - POSTGRES_DB=test-task
       - POSTGRES_USER=backend
       - POSTGRES_PASSWORD=development
     command: -c work_mem=64MB
     volumes:
       - database-data:/var/lib/postgresql/data
+volumes:
+  database-data:
